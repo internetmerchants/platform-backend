@@ -6,17 +6,23 @@ from .db import engine, Base, get_session, settings
 from .models import Account  # Import your models
 # from .routers.tasks import router as tasks_router  # Comment out for now
 from .routers import search
+from .routers import agents
+
+# Load environment variables from .env file
+# Now your OPENAI_API_KEY will be available
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 app = FastAPI(title="Platform API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_ORIGIN],
+    allow_origins=["*"],  # Changed this line
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 @app.on_event("startup")
 async def on_startup():
     # Create tables if missing
@@ -32,6 +38,7 @@ async def ping():
     return {"ok": True}
 
 app.include_router(search.router)
+app.include_router(agents.router)
 
 # Test endpoint to verify database connection
 @app.get("/test-db")
@@ -49,6 +56,3 @@ async def test_db():
             return {"database": "error", "message": str(e)}
         break
 
-# Later you can add routers:
-# app.include_router(search_router)
-# app.include_router(accounts_router)
